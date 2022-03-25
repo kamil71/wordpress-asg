@@ -1,0 +1,39 @@
+#!/bin/bash -xe
+
+sudo mount -t efs '${efs}':/ /var/www/
+#sudo su -c \"echo '${efs}:/ /var/www/html efs defaults,vers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport 0 0' >> /etc/fstab\"
+#sudo -u root bash -c 'echo "fs-03f83619e5dcf0806:/ /mnt/efs nfs defaults,vers=4.1 0 0"' | sudo -u root bash -c "cat >> /etc/fstab"
+sudo -u root bash -c 'echo "'${efs}':/ /mnt/efs nfs defaults,vers=4.1 0 0"' | sudo -u root bash -c "cat >> /etc/fstab"
+
+
+# Download wordpress site & move to http
+cd /var/www/
+sudo curl -O https://wordpress.org/latest.tar.gz && tar -zxf latest.tar.gz 
+sudo mv wordpress /var/www/html
+
+#permissions
+sudo chown -R ubuntu:www-data /var/www/html
+sudo chmod 2775 /var/www/html
+sudo chmod 2775 /var/www
+sudo find /var/www -type d -exec chmod 2775 {} +
+sudo find /var/www -type f -exec chmod 0664 {} +
+
+cd /var/www/html
+cp wp-config-sample.php wp-config.php
+
+cat <<EOF >>/var/www/html/wp-config.php
+
+define( 'FS_METHOD', 'direct' );
+define('WP_MEMORY_LIMIT', '256M');
+EOF
+
+# Create database user and grant privileges
+#mysql -u root -p"$database_password" -e "GRANT ALL PRIVILEGES ON *.* TO '$db_username'@'localhost' IDENTIFIED BY '$db_user_password';FLUSH PRIVILEGES;"
+
+sed -i "s/database_name_here/${dbname}/g" wp-config.php
+sed -i "s/username_here/${user}/g" wp-config.php
+sed -i "s/password_here/${password}/g" wp-config.php
+sed -i "s/localhost/${rds_endpoint}/g" wp-config.php
+
+# Create database
+#mysql -h ${rds_endpoint} -u ${user} -p ${password} -e "CREATE DATABASE ${dbname};"
