@@ -1,4 +1,4 @@
-# Deploying VPC+ASG+ALB via Terraform on AWS
+# Deploying Wordpress within VPC on AutoScaling Group via Terraform on AWS
 
 Configuration in this directory creates several different variations of resources for VPC, Autoscaling Group, Application Load Balancer.
 
