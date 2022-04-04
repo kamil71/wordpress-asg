@@ -31,3 +31,30 @@ variable "database_name" {
 variable "key_name" {
   description = "key Name"
 }
+
+variable "vpc_id" {
+  description = "vpc id"
+}
+
+variable "subnets" {
+  description = "subnets"
+}
+
+variable "security_groups" {
+  description = "subnets"
+}
+
+
+variable "lb_target_group_arn" {
+  description = "subnets"
+}
+
+variable "efs_id1" {
+    description = "test"
+    type = string
+#    default = "module.efs.efs-kamil"
+}
+
+variable "db_endpoint" {
+  description = "db endpoint"
+}

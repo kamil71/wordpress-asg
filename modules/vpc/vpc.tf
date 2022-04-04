@@ -1,3 +1,29 @@
+# Declare the data source
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+  owners = ["099720109477"] # Canonical official
+
+}
+
 /*====
 The VPC
 ======*/
@@ -145,4 +171,16 @@ resource "aws_security_group" "default" {
   tags = {
     Environment = "${var.environment}"
   }
+}
+
+output "vpc_id" {
+  value = aws_vpc.vpc.id
+}
+
+output "public_subnets" {
+  value = aws_subnet.public_subnet.*.id
+}
+
+output "private_subnets" {
+  value = aws_subnet.private_subnet.*.id
 }

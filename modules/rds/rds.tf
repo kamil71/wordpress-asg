@@ -16,7 +16,8 @@ resource "aws_db_instance" "myrds" {
 
 resource "aws_db_subnet_group" "mysubnet" {
   name       = "main"
-  subnet_ids = (aws_subnet.private_subnet.*.id)
+  subnet_ids =  var.private_subnet_ids
+#  subnet_ids = flatten(["module.vpc.aws_subnet.private_subnet"])
 
   tags = {
     Name = "My DB subnet group"
@@ -26,7 +27,7 @@ resource "aws_db_subnet_group" "mysubnet" {
 
 resource "aws_security_group" "rds-instance-sg" {
   name        = "Allow db traffic"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = var.vpc_id
   description = "Allow db inbound traffic"
 
   ingress {
@@ -36,7 +37,7 @@ resource "aws_security_group" "rds-instance-sg" {
     protocol    = "tcp"
     #    cidr_blocks      = aws_vpc.vpc.cidr_block
     ipv6_cidr_blocks = ["::/0"]
-    security_groups  = [aws_security_group.ec2-instance-sg.id]
+    security_groups  = [var.security_groups]
   }
 
   egress {
@@ -51,4 +52,8 @@ resource "aws_security_group" "rds-instance-sg" {
     Name = "allow_web_traffic"
   }
 
+}
+
+output "rds-endpoint" {
+  value = aws_db_instance.myrds.address
 }

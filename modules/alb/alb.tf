@@ -7,7 +7,7 @@ resource "aws_lb_target_group" "tg" {
   port        = 80
   target_type = "instance"
   protocol    = "HTTP"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = var.vpc_id
 
   health_check {
     path                = "/index.php"
@@ -19,15 +19,13 @@ resource "aws_lb_target_group" "tg" {
   }
 }
 
-
-
 resource "aws_lb" "lb" {
   name               = "ALB"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.ec2-instance-sg.id, ]
-  subnets            = aws_subnet.public_subnet.*.id
-  #  subnets = [for subnet in aws_subnet.public_subnet : subnet.id]
+  security_groups    = [var.security_groups]
+  #subnets            = flatten(["module.vpc.aws_subnet.public_subnet"])
+  subnets            = var.subnets
 }
 
 ####################################################
@@ -69,4 +67,13 @@ resource "aws_lb_listener_rule" "static" {
       values = ["/var/www/html/index.php"]
     }
   }
+}
+
+output "aws-alb-target-group-arn" {
+  value = aws_lb_target_group.tg.arn
+}
+
+output "lb_dns_name1" {
+  description = "The DNS name of the load balancer."
+  value       = aws_lb.lb.dns_name
 }

@@ -31,3 +31,22 @@ variable "database_name" {
 variable "key_name" {
   description = "key Name"
 }
+
+
+variable "vpc_id" {
+  description = "vpc id"
+}
+
+variable "subnets" {
+  description = "subnets"
+}
+
+variable "security_groups" {
+  description = "subnets"
+}
+
+
+variable "private_subnet_ids" {
+  description = "subnets"
+}
+

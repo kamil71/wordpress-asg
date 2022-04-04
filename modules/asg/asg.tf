@@ -34,7 +34,7 @@ resource "aws_launch_configuration" "web" {
   instance_type   = "t2.micro"
   security_groups = ["${aws_security_group.ec2-instance-sg.id}"]
   key_name        = var.key_name
-  user_data = templatefile("user_data.tfpl", { rds_endpoint = "${aws_db_instance.myrds.address}", user = var.database_username, password = var.database_password, dbname = var.database_name, efs = "${aws_efs_file_system.Wordpress-EFS.id}" })
+  user_data = templatefile("${path.module}/user_data.tfpl", { rds_endpoint = var.db_endpoint, user = var.database_username, password = var.database_password, dbname = var.database_name, efs = var.efs_id1 })
   #  instance_initiated_shutdown_behavior = "terminate"
   lifecycle {
     create_before_destroy = true
@@ -49,11 +49,12 @@ resource "aws_autoscaling_group" "web" {
   name                 = "terraform-asg-example"
   launch_configuration = aws_launch_configuration.web.id
   force_delete         = true
-  vpc_zone_identifier  = aws_subnet.public_subnet.*.id
+  #vpc_zone_identifier  = ["module.vpc.aws_subnet.public_subnet.ids"]
+  vpc_zone_identifier   = flatten(var.subnets)
   #  availability_zones   = var.availability_zones
   min_size         = 1
   max_size         = 2
-  desired_capacity = 2
+  desired_capacity = 1
   #  target_group_arns = ["aws_lb_target_group.tg.arn"]
   #  target_group_arns = ["${var.target_group_arn}"]
   health_check_type = "ELB"
@@ -71,12 +72,13 @@ resource "aws_autoscaling_group" "web" {
 resource "aws_autoscaling_attachment" "asg_attachment_bar" {
   autoscaling_group_name = aws_autoscaling_group.web.id
 
-  lb_target_group_arn = aws_lb_target_group.tg.arn
+#  lb_target_group_arn = "module.alb.aws_lb_target_group.tg.arn"
+    lb_target_group_arn = var.lb_target_group_arn
 }
 
 resource "aws_security_group" "ec2-instance-sg" {
   name        = "Allow web traffic"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = var.vpc_id
   description = "Allow Web inbound traffic"
 
   ingress {
@@ -111,3 +113,6 @@ resource "aws_security_group" "ec2-instance-sg" {
 
 }
 
+output "ec2-instance-sg" {
+  value = aws_security_group.ec2-instance-sg.id
+}

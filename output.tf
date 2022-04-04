@@ -1,33 +1,39 @@
 output "vpc_id" {
-  value = aws_vpc.vpc.id
+  value = module.vpc.vpc_id
 }
 
-output "public_subnets_id" {
-  value = ["${aws_subnet.public_subnet.*.id}"]
+output "public_subnets_ids" {
+  value = module.vpc.public_subnets
 }
 
-output "private_subnets_id" {
-  value = ["${aws_subnet.private_subnet.*.id}"]
+output "private_subnets_ids" {
+  value =  module.vpc.private_subnets
 }
 
 output "default_sg_id" {
-  value = aws_security_group.default.id
+  value = module.asg.ec2-instance-sg
 }
 
 output "security_groups_ids" {
-  value = ["${aws_security_group.default.id}"]
+  value = "module.asg.aws_security_group.ec2-instance-sg.id"
 }
 
 output "public_route_table" {
-  value = aws_route_table.public.id
+  value = "module.vpc.aws_route_table.public.id"
 }
 
-#output "server-public-ip" {
-#  value       = aws_instance.myweb.*.public_ip
-#  description = "Instance PublicIP"
-#}
 
 output "lb_dns_name" {
   description = "The DNS name of the load balancer."
-  value       = concat(aws_lb.lb.*.dns_name, [""])[0]
+  value       = module.alb.lb_dns_name1
+}
+
+output "efs_id" {
+  description = "The DNS name of the load balancer."
+  value       = module.efs.efs-kamil
+}
+
+output "rds_endpoint" {
+  description = "RDS endpoint"
+  value = module.rds.rds-endpoint
 }
